@@ -16,7 +16,8 @@ import {
   Tag,
   DollarSign,
   QrCode,
-  BarChart3
+  BarChart3,
+  CreditCard
 } from 'lucide-react';
 import { PieChartWidget } from '../components/charts/PieChartWidget';
 import { LineGraphWidget } from '../components/charts/LineGraphWidget';
@@ -292,6 +293,108 @@ export const MerchantDashboard: React.FC = () => {
                 <span>{t.merchant.makeOfferBtn}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 2.5 PROCUREMENT CONTRACTS & DIRECT FARMER PAYMENTS */}
+      <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
+              <CreditCard className="w-5 h-5 text-emerald-600" />
+              <span>Procurement Contracts & Direct Farmer Payments</span>
+            </h2>
+            <p className="text-xs text-slate-500">
+              Review active trade contracts, release payments directly to farmers via UPI QR Code or Escrow, and track instant settlement.
+            </p>
+          </div>
+          <span className="text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
+            {orders.length > 0 ? orders.length : 3} Active Contracts
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {(orders.length > 0 ? orders : [
+            {
+              id: 'ord-101',
+              cropName: 'Basmati Rice (A-Grade)',
+              quantity: 120,
+              totalAmount: 504000,
+              status: 'ACCEPTED',
+              paymentStatus: 'PENDING',
+              seller: { name: 'Gurdev Singh (Farmer)' },
+              createdAt: new Date().toISOString()
+            },
+            {
+              id: 'ord-102',
+              cropName: 'Wheat Grain (Sharbati)',
+              quantity: 250,
+              totalAmount: 600000,
+              status: 'DELIVERED',
+              paymentStatus: 'PENDING',
+              seller: { name: 'Harpreet Kaur (Farmer)' },
+              createdAt: new Date().toISOString()
+            },
+            {
+              id: 'ord-103',
+              cropName: 'Yellow Maize',
+              quantity: 80,
+              totalAmount: 176000,
+              status: 'IN_TRANSIT',
+              paymentStatus: 'COMPLETED',
+              seller: { name: 'Manjit Singh (Farmer)' },
+              createdAt: new Date().toISOString()
+            }
+          ]).map((ord: any) => (
+            <div key={ord.id} className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-4 hover:border-emerald-400 transition-all flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-900 flex items-center space-x-1">
+                    <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Contract #{String(ord.id).slice(-6).toUpperCase()}</span>
+                  </span>
+                  <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                    ord.paymentStatus === 'COMPLETED'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {ord.paymentStatus === 'COMPLETED' ? 'PAID ✓' : 'PAYMENT DUE'}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">{translateDynamic(ord.cropName)}</h3>
+                  <p className="text-xs text-slate-500">Supplier: <strong className="text-slate-800">{ord.seller?.name || 'Farmer'}</strong></p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Volume:</span>
+                    <span className="font-bold text-slate-900">{ord.quantity} Qtl</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Contract Total:</span>
+                    <span className="font-extrabold text-emerald-600">Rs. {Number(ord.totalAmount).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {ord.paymentStatus === 'COMPLETED' ? (
+                <div className="w-full py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold text-center border border-emerald-200 flex items-center justify-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Settled via UPI / Escrow</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setActivePaymentOrder(ord)}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center space-x-2"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>💳 Pay Farmer Now (UPI / Escrow)</span>
+                </button>
+              )}
             </div>
           ))}
         </div>

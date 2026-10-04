@@ -150,15 +150,22 @@ export class FarmerController {
 
       // Find field or use default
       let targetFieldId = fieldId;
+      let locationName = 'Ludhiana Farm Gate';
       if (!targetFieldId) {
-        let field = await prisma.field.findFirst({ where: { farm: { farmerId } } });
+        let field = await prisma.field.findFirst({
+          where: { farm: { farmerId } },
+          include: { farm: true }
+        });
         if (!field) {
           const farm = await prisma.farm.create({
-            data: { farmerId, name: 'Default Farm', locationName: 'Local Region' }
+            data: { farmerId, name: 'Green Valley Farm', locationName: 'Ludhiana Farm Gate' }
           });
           field = await prisma.field.create({
             data: { farmId: farm.id, name: 'Main Field', areaAcres: area ? parseFloat(area) : 5.0 }
           });
+          locationName = farm.locationName;
+        } else {
+          locationName = field.farm.locationName;
         }
         targetFieldId = field.id;
       }
@@ -178,9 +185,24 @@ export class FarmerController {
         include: { crop: true, field: true }
       });
 
+      // Auto-publish to ProduceListing marketplace so it is instantly visible to Merchants & Consumers
+      await prisma.produceListing.create({
+        data: {
+          farmerId,
+          cropName,
+          variety,
+          availableQuantity: expectedYield ? parseFloat(expectedYield) : 25.0,
+          unit: 'Quintals',
+          askingPricePerUnit: marketPrice ? parseFloat(marketPrice) : 3000.0,
+          qualityGrade: 'Grade A',
+          locationName: locationName,
+          status: 'AVAILABLE'
+        }
+      });
+
       return res.status(201).json({
         success: true,
-        message: 'Crop registered in field digital twin successfully',
+        message: 'Crop registered in field digital twin & marketplace successfully',
         data: cycle
       });
     } catch (err: any) {
