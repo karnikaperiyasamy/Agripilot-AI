@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "AgriPilot AI — AI Decision Support System for Modern Farmers",
   "scripts": {
+    "start": "concurrently -k -p \"[{name}]\" -c \"cyan,emerald\" -n \"BACKEND,FRONTEND\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "dev": "concurrently -k -p \"[{name}]\" -c \"cyan,emerald\" -n \"BACKEND,FRONTEND\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
-    "dev:all": "concurrently -k -p \"[{name}]\" -c \"magenta,cyan,emerald\" -n \"AI-SERVICE,BACKEND,FRONTEND\" \"python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --app-dir ai-service\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
-    "build": "npm --prefix backend run build && npm --prefix frontend run build",
-    "start": "start_agripilot.bat",
-    "seed": "npm --prefix backend run prisma:seed"
+    "postinstall": "npm --prefix backend install && npm --prefix frontend install && npm --prefix backend run prisma:push && npm --prefix backend run prisma:seed",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
