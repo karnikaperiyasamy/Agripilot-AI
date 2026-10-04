@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmProfit - Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header"><h3><i class="fas fa-leaf"></i> FarmProfit</h3></div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="crops.html"><i class="fas fa-seedling"></i> Crops</a></li>
+            <li class="nav-item"><a class="nav-link active" href="expenses.html"><i class="fas fa-money-bill-wave"></i> Expenses</a></li>
+            <li class="nav-item"><a class="nav-link" href="profit.html"><i class="fas fa-chart-line"></i> Profit Calculator</a></li>
+            <li class="nav-item"><a class="nav-link" href="schemes.html"><i class="fas fa-hand-holding-usd"></i> Govt Schemes</a></li>
+            <li class="nav-item"><a class="nav-link" href="reports.html"><i class="fas fa-file-alt"></i> Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="ai-assistant.html"><i class="fas fa-robot"></i> AI Assistant</a></li>
+            <li class="nav-item"><a class="nav-link" href="chatbot.html"><i class="fas fa-comment-dots"></i> AI Chatbot</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <nav class="top-navbar"><div class="container-fluid"><span class="navbar-text" id="userName"></span></div></nav>
+        
+        <div class="container-fluid mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-money-bill-wave me-2"></i>Expense Tracker</h2>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                    <i class="fas fa-plus me-2"></i>Add Expense
+                </button>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card"><div class="stat-icon bg-warning"><i class="fas fa-rupee-sign"></i></div>
+                    <div class="stat-info"><h3 id="totalExpensesAmount">₹0</h3><p>Total Expenses</p></div></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card"><div class="stat-icon bg-info"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info"><h3 id="avgExpense">₹0</h3><p>Average Expense</p></div></div>
+                </div>
+                <div class="col-md-6">
+                    <!-- EXTRA FEATURE: category breakdown so farmers can see where money goes -->
+                    <div class="stat-card"><div class="stat-icon bg-success"><i class="fas fa-chart-pie"></i></div>
+                    <div class="stat-info w-100"><p class="mb-1">By Category</p><div id="categoryBreakdown" class="small text-muted"></div></div></div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead><tr><th>ID</th><th>Expense Type</th><th>Amount</th><th>Crop</th><th>Description</th><th>Date</th><th>Actions</th></tr></thead>
+                        <tbody id="expensesList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div class="modal fade" id="addExpenseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="expenseStatusMsg" style="display:none; padding:10px; margin-bottom:10px; border-radius:6px; font-weight:bold;"></div>
+                    <form id="addExpenseForm">
+                        <div class="mb-3"><label>Expense Type</label><select id="expenseType" class="form-control"><option>Seeds</option><option>Fertilizers</option><option>Labor</option><option>Equipment</option><option>Irrigation</option><option>Pesticides</option></select></div>
+                        <div class="mb-3"><label>Amount (₹)</label><input type="number" id="amount" class="form-control" required></div>
+                        <!-- EXTRA FEATURE: link an expense to a crop so profit-per-crop is accurate -->
+                        <div class="mb-3"><label>Crop (optional)</label><select id="expenseCrop" class="form-control"><option value="">General / Not crop-specific</option></select></div>
+                        <div class="mb-3"><label>Date</label><input type="date" id="expenseDate" class="form-control"></div>
+                        <div class="mb-3"><label>Description</label><textarea id="description" class="form-control" rows="2"></textarea></div>
+                        <button type="submit" class="btn btn-success w-100">Save Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal (extra feature - editing was missing entirely) -->
+    <div class="modal fade" id="editExpenseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editExpenseForm">
+                        <input type="hidden" id="editExpenseId">
+                        <div class="mb-3"><label>Expense Type</label><select id="editExpenseType" class="form-control"><option>Seeds</option><option>Fertilizers</option><option>Labor</option><option>Equipment</option><option>Irrigation</option><option>Pesticides</option></select></div>
+                        <div class="mb-3"><label>Amount (₹)</label><input type="number" id="editAmount" class="form-control" required></div>
+                        <div class="mb-3"><label>Crop (optional)</label><select id="editExpenseCrop" class="form-control"><option value="">General / Not crop-specific</option></select></div>
+                        <div class="mb-3"><label>Date</label><input type="date" id="editExpenseDate" class="form-control"></div>
+                        <div class="mb-3"><label>Description</label><textarea id="editDescription" class="form-control" rows="2"></textarea></div>
+                        <button type="submit" class="btn btn-warning w-100">Update Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading-spinner"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/expenses.js"></script>
+</body>
+</html>

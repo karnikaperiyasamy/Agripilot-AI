@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmProfit - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;}
+        .sidebar{width:260px;background:#1e3c2c;color:white;min-height:100vh;position:fixed;left:0;top:0;padding:20px;}
+        .sidebar-header{text-align:center;padding-bottom:20px;border-bottom:2px solid #2ecc71;margin-bottom:20px;}
+        .sidebar-header h3{margin:0;}
+        .sidebar .nav-link{color:white;padding:12px 15px;margin:5px 0;border-radius:10px;text-decoration:none;display:block;transition:all 0.3s;}
+        .sidebar .nav-link:hover{background:#2ecc71;transform:translateX(5px);}
+        .sidebar .nav-link i{margin-right:10px;width:20px;}
+        .main-content{margin-left:260px;padding:20px;}
+        .top-navbar{background:white;padding:15px 20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        .stat-card{background:white;border-radius:15px;padding:20px;display:flex;align-items:center;box-shadow:0 5px 15px rgba(0,0,0,0.1);margin-bottom:20px;transition:transform 0.3s;}
+        .stat-card:hover{transform:translateY(-5px);}
+        .stat-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:15px;}
+        .stat-icon i{font-size:30px;color:white;}
+        .bg-success{background:#2ecc71;}
+        .bg-warning{background:#f39c12;}
+        .bg-info{background:#3498db;}
+        .bg-danger{background:#e74c3c;}
+        .stat-info h3{font-size:28px;margin-bottom:5px;color:#333;}
+        .stat-info p{color:#666;margin-bottom:0;}
+        .chart-container{background:white;border-radius:15px;padding:20px;margin-bottom:20px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+        .table-container{background:white;border-radius:15px;padding:20px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+        .btn-logout{background:#e74c3c;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;}
+        .btn-logout:hover{background:#c0392b;}
+        .loading{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:10px;z-index:9999;}
+        @media(max-width:768px){.sidebar{margin-left:-260px;}.main-content{margin-left:0;}}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header"><h3><i class="fas fa-leaf"></i> FarmProfit</h3></div>
+        <a class="nav-link active" href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a class="nav-link" href="crops.html"><i class="fas fa-seedling"></i> Crops</a>
+        <a class="nav-link" href="expenses.html"><i class="fas fa-money-bill-wave"></i> Expenses</a>
+        <a class="nav-link" href="profit.html"><i class="fas fa-chart-line"></i> Profit</a>
+        <a class="nav-link" href="schemes.html"><i class="fas fa-hand-holding-usd"></i> Schemes</a>
+        <a class="nav-link" href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+        <a class="nav-link" href="ai-assistant.html"><i class="fas fa-robot"></i> AI Assistant</a>
+        <a class="nav-link" href="chatbot.html"><i class="fas fa-comment-dots"></i> Chatbot</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-navbar">
+            <span id="userName"><i class="fas fa-user-circle"></i> Welcome</span>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+
+        <div class="container-fluid">
+            <h2 class="mb-4">Farm Dashboard</h2>
+            <div class="row">
+                <div class="col-md-3"><div class="stat-card"><div class="stat-icon bg-success"><i class="fas fa-seedling"></i></div><div class="stat-info"><h3 id="totalCrops">0</h3><p>Total Crops</p></div></div></div>
+                <div class="col-md-3"><div class="stat-card"><div class="stat-icon bg-warning"><i class="fas fa-rupee-sign"></i></div><div class="stat-info"><h3 id="totalExpenses">₹0</h3><p>Total Expenses</p></div></div></div>
+                <div class="col-md-3"><div class="stat-card"><div class="stat-icon bg-info"><i class="fas fa-chart-line"></i></div><div class="stat-info"><h3 id="totalIncome">₹0</h3><p>Est. Income</p></div></div></div>
+                <div class="col-md-3"><div class="stat-card"><div class="stat-icon bg-danger"><i class="fas fa-chart-bar"></i></div><div class="stat-info"><h3 id="totalProfit">₹0</h3><p>Est. Profit</p></div></div></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6"><div class="chart-container"><canvas id="expenseChart"></canvas></div></div>
+                <div class="col-md-6"><div class="chart-container"><canvas id="categoryChart"></canvas></div></div>
+            </div>
+            <div class="table-container"><h5>Recent Crops</h5><div class="table-responsive"><table class="table"><thead><tr><th>Crop Name</th><th>Area (Acres)</th><th>Season</th><th>Status</th></tr></thead><tbody id="recentCrops"></tbody></table></div></div>
+        </div>
+    </div>
+    <div id="loading" class="loading"><div class="spinner-border text-success"></div></div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'index.html';
+        
+        function showLoading() { document.getElementById('loading').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+        
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = { method, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } };
+            if (data) options.body = JSON.stringify(data);
+            const response = await fetch(`${API_URL}${endpoint}`, options);
+            if (response.status === 401) logout();
+            return response.json();
+        }
+        
+        let expenseChart, categoryChart;
+        
+        async function loadDashboard() {
+            showLoading();
+            try {
+                const crops = await apiCall('/farmer/crops');
+                const expenses = await apiCall('/farmer/expenses');
+                const totalExpenses = expenses.reduce((s,e) => s + (e.amount || 0), 0);
+                const totalIncome = crops.reduce((s,c) => s + ((c.expectedYield || 0) * 2500), 0);
+                
+                document.getElementById('totalCrops').innerText = crops.length;
+                document.getElementById('totalExpenses').innerText = '₹' + totalExpenses.toLocaleString();
+                document.getElementById('totalIncome').innerText = '₹' + totalIncome.toLocaleString();
+                document.getElementById('totalProfit').innerText = '₹' + (totalIncome - totalExpenses).toLocaleString();
+                
+                const monthlyData = {};
+                expenses.forEach(e => { if(e.expenseDate){ let m = new Date(e.expenseDate).toLocaleDateString('en',{month:'short'}); monthlyData[m] = (monthlyData[m]||0)+(e.amount||0); } });
+                
+                if(expenseChart) expenseChart.destroy();
+                expenseChart = new Chart(document.getElementById('expenseChart'), { type:'line', data:{ labels:Object.keys(monthlyData), datasets:[{ label:'Expenses (₹)', data:Object.values(monthlyData), borderColor:'#2ecc71', tension:0.4 }] } });
+                
+                const catData = {};
+                expenses.forEach(e => { catData[e.expenseType||'Other'] = (catData[e.expenseType||'Other']||0)+(e.amount||0); });
+                if(categoryChart) categoryChart.destroy();
+                categoryChart = new Chart(document.getElementById('categoryChart'), { type:'pie', data:{ labels:Object.keys(catData), datasets:[{ data:Object.values(catData), backgroundColor:['#2ecc71','#3498db','#e74c3c','#f39c12'] }] } });
+                
+                document.getElementById('recentCrops').innerHTML = crops.slice(0,5).map(c => `<tr><td>${c.cropName}</td><td>${c.area}</td><td>${c.season}</td><td><span class="badge bg-success">${c.status||'Active'}</span></td></tr>`).join('');
+            } catch(e) { console.error(e); } finally { hideLoading(); }
+        }
+        
+        document.getElementById('userName').innerHTML = `<i class="fas fa-user-circle"></i> Welcome, ${localStorage.getItem('userName') || 'Farmer'}`;
+        loadDashboard();
+    </script>
+</body>
+</html>

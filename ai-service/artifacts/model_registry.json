@@ -1,0 +1,131 @@
+{
+  "system_name": "AgriTwin AI ML Engine",
+  "compiled_at": "2026-09-28T18:13:24.973513Z",
+  "version": "1.0.0",
+  "models": {
+    "crop_yield_predictor": {
+      "type": "RandomForestRegressor",
+      "artifact": "yield_predictor_v1.joblib",
+      "features": [
+        "crop",
+        "soil_type",
+        "irrigation_type",
+        "area_acres",
+        "rainfall_mm",
+        "temperature_c",
+        "nitrogen_kg",
+        "phosphorus_kg",
+        "potassium_kg"
+      ],
+      "metrics": {
+        "r2_score": 0.9893,
+        "rmse_quintals_per_acre": 11.62,
+        "mae_quintals_per_acre": 6.38
+      },
+      "status": "ACTIVE_PRODUCTION",
+      "crops_supported": [
+        "Rice",
+        "Wheat",
+        "Maize",
+        "Sugarcane",
+        "Cotton",
+        "Soybean",
+        "Tomato",
+        "Potato"
+      ]
+    },
+    "pest_risk_classifier": {
+      "type": "GradientBoostingClassifier",
+      "artifact": "pest_risk_classifier_v1.joblib",
+      "features": [
+        "crop",
+        "growth_stage",
+        "temperature_c",
+        "humidity_percent",
+        "rainfall_7d_mm",
+        "soil_moisture_percent",
+        "leaf_wetness_hours"
+      ],
+      "metrics": {
+        "accuracy": 0.7883,
+        "weighted_f1": 0.7883
+      },
+      "status": "ACTIVE_PRODUCTION",
+      "risk_levels": [
+        "Low",
+        "Moderate",
+        "High",
+        "Severe"
+      ]
+    },
+    "mandi_price_forecaster": {
+      "type": "GradientBoostingRegressor",
+      "artifact": "price_forecaster_v1.joblib",
+      "features": [
+        "crop",
+        "mandi",
+        "month",
+        "day_of_year",
+        "current_price",
+        "lag_7d_price",
+        "lag_14d_price",
+        "lag_30d_price",
+        "arrival_volume_quintals"
+      ],
+      "metrics": {
+        "r2_score": 0.9986,
+        "rmse_inr_per_quintal": 74.62
+      },
+      "status": "ACTIVE_PRODUCTION",
+      "forecast_horizons_days": [
+        7,
+        14,
+        30
+      ]
+    },
+    "crop_disease_cnn": {
+      "type": "PyTorch Deep CNN (AgriTwinDiseaseClassifier)",
+      "artifact": "crop_disease_cnn_v1.pth",
+      "classes_count": 14,
+      "classes": [
+        "Rice___Bacterial_Blight",
+        "Rice___Brown_Spot",
+        "Rice___Leaf_Blast",
+        "Rice___Healthy",
+        "Wheat___Leaf_Rust",
+        "Wheat___Yellow_Rust",
+        "Wheat___Healthy",
+        "Tomato___Early_Blight",
+        "Tomato___Late_Blight",
+        "Tomato___Leaf_Curl_Virus",
+        "Tomato___Healthy",
+        "Potato___Early_Blight",
+        "Potato___Late_Blight",
+        "Potato___Healthy"
+      ],
+      "confidence_threshold": 0.7,
+      "status": "ACTIVE_PRODUCTION"
+    },
+    "harvest_window_estimator": {
+      "type": "GDD & Agronomic Phenology Engine",
+      "methodology": "Growing Degree Days (Base Temp 10\u00b0C) + Field Maturity Phenology",
+      "status": "ACTIVE_PRODUCTION"
+    },
+    "farmer_buyer_matcher": {
+      "type": "Multi-Criteria Vectorized Match Engine",
+      "parameters": [
+        "Crop Match",
+        "Haversine Distance",
+        "Quantity Ratio",
+        "Price Spread",
+        "Quality Rating"
+      ],
+      "status": "ACTIVE_PRODUCTION"
+    },
+    "irrigation_decision_engine": {
+      "type": "FAO-56 Penman-Monteith Evapotranspiration & Soil Moisture Balance",
+      "methodology": "Dual Kc Growth Stage Coefficients + Readily Available Water (RAW)",
+      "status": "ACTIVE_PRODUCTION"
+    }
+  }
+}

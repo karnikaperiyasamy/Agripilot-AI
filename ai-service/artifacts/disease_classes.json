@@ -1,0 +1,24 @@
+{
+  "classes": [
+    "Rice___Bacterial_Blight",
+    "Rice___Brown_Spot",
+    "Rice___Leaf_Blast",
+    "Rice___Healthy",
+    "Wheat___Leaf_Rust",
+    "Wheat___Yellow_Rust",
+    "Wheat___Healthy",
+    "Tomato___Early_Blight",
+    "Tomato___Late_Blight",
+    "Tomato___Leaf_Curl_Virus",
+    "Tomato___Healthy",
+    "Potato___Early_Blight",
+    "Potato___Late_Blight",
+    "Potato___Healthy"
+  ],
+  "confidence_threshold": 0.7,
+  "input_resolution": [
+    224,
+    224
+  ],
+  "version": "1.0.0"
+}

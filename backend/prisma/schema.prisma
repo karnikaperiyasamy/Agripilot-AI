@@ -1,0 +1,621 @@
+// AgriTwin AI - Comprehensive Normalized Relational Database Schema
+// Provider configured for robust local execution with zero external password dependency,
+// seamlessly compatible with PostgreSQL by changing provider to "postgresql".
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// 1. IDENTITY & RBAC
+// ----------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("FARMER") // FARMER, MERCHANT, TRANSPORTER, EXPERT, CONSUMER, ADMIN
+  phone        String?
+  languagePref String   @default("en")    // en, ta, hi
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  farmerProfile      FarmerProfile?
+  merchantProfile    MerchantProfile?
+  transporterProfile TransporterProfile?
+  expertProfile      ExpertProfile?
+  consumerProfile    ConsumerProfile?
+
+  farms             Farm[]
+  expenses          Expense[]
+  revenues          Revenue[]
+  marketListings    MarketListing[]
+  buyerRequirements BuyerRequirement[]
+  sentOffers        Offer[]                  @relation("SentOffers")
+  receivedOffers    Offer[]                  @relation("ReceivedOffers")
+  negotiations      NegotiationMessage[]
+  buyerOrders       Order[]                  @relation("BuyerOrders")
+  sellerOrders      Order[]                  @relation("SellerOrders")
+  machineryListings Machinery[]
+  machineryBookings MachineryBooking[]       @relation("RenterBookings")
+  laborJobs         LaborJob[]
+  healthCases       CropHealthObservation[]
+  expertConsults    ExpertCase[]
+  notifications     Notification[]
+  reviewsGiven      Review[]                 @relation("ReviewsGiven")
+  reviewsReceived   Review[]                 @relation("ReviewsReceived")
+  auditLogs         AuditLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model FarmerProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farmName          String?
+  state             String?
+  district          String?
+  totalAreaAcres    Float    @default(5.0)
+  experienceYears   Int      @default(5)
+  primarySoilType   String   @default("Alluvial")
+  irrigationMethod  String   @default("Drip")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model MerchantProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName   String
+  gstNumber      String?
+  businessType   String   @default("Wholesale Trader")
+  address        String?
+  isVerified     Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model TransporterProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName    String
+  vehicleCount   Int      @default(2)
+  serviceRegions String   @default("North India, Punjab, Haryana, Delhi-NCR")
+  permitType     String   @default("National All India Permit")
+  isAvailable    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model ExpertProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualification   String   @default("M.Sc. Agronomy / Plant Pathology")
+  specialization  String   @default("Cereals, Oilseeds & Disease Management")
+  licenseNumber   String?
+  consultationFee Float    @default(0.0) // 0 for government / community extension
+  rating          Float    @default(4.9)
+  createdAt       DateTime @default(now())
+}
+
+model ConsumerProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveryAddress   String?
+  preferredCrops    String?
+  createdAt         DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// 2. FARMS, FIELDS & DIGITAL TWIN
+// ----------------------------------------------------
+
+model Farm {
+  id             String   @id @default(uuid())
+  farmerId       String
+  farmer         User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  name           String
+  locationName   String
+  latitude       Float    @default(30.9010)
+  longitude      Float    @default(75.8573)
+  totalAreaAcres Float    @default(5.5)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  fields         Field[]
+  weatherRecords WeatherRecord[]
+
+  @@index([farmerId])
+}
+
+model Field {
+  id                   String   @id @default(uuid())
+  farmId               String
+  farm                 Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  name                 String
+  areaAcres            Float
+  soilType             String   @default("Alluvial")
+  irrigationType       String   @default("Drip")
+  currentCropCycleId   String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  cropCycles           CropCycle[]
+  soilRecords          SoilRecord[]
+  irrigationRecords    IrrigationRecord[]
+  healthObservations   CropHealthObservation[]
+
+  @@index([farmId])
+}
+
+model Crop {
+  id                  String   @id @default(uuid())
+  name                String   @unique
+  botanicalName       String?
+  category            String   @default("Cereal")
+  defaultDurationDays Int      @default(120)
+  season              String   @default("Kharif")
+  minTemperature      Float    @default(18.0)
+  maxTemperature      Float    @default(35.0)
+  createdAt           DateTime @default(now())
+
+  cropCycles          CropCycle[]
+}
+
+model CropCycle {
+  id                   String   @id @default(uuid())
+  fieldId              String
+  field                Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  cropId               String
+  crop                 Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  variety              String   @default("PBW-502 / Pusa Basmati")
+  sowingDate           DateTime
+  expectedHarvestDate  DateTime
+  actualHarvestDate    DateTime?
+  status               String   @default("GROWING") // PLANNED, GROWING, FLOWERING, HARVEST_READY, HARVESTED
+  currentGrowthStage   String   @default("Vegetative") // Vegetative, Tillering/Branching, Flowering, Fruiting/GrainFilling, Maturity
+  targetYieldQuintals  Float    @default(25.0)
+  actualYieldQuintals  Float?
+  expectedMarketPrice  Float    @default(3500.0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  activities           FarmActivity[]
+  expenses             Expense[]
+  revenues             Revenue[]
+  healthObservations   CropHealthObservation[]
+
+  @@index([fieldId])
+  @@index([cropId])
+}
+
+model SoilRecord {
+  id                    String   @id @default(uuid())
+  fieldId               String
+  field                 Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  testDate              DateTime @default(now())
+  ph                    Float    @default(7.2)
+  nitrogenKgHa          Float    @default(120.0)
+  phosphorusKgHa        Float    @default(45.0)
+  potassiumKgHa         Float    @default(55.0)
+  organicMatterPercent  Float    @default(1.1)
+  electricalConductivity Float   @default(0.4)
+  notes                 String?
+  createdAt             DateTime @default(now())
+
+  @@index([fieldId])
+}
+
+model WeatherRecord {
+  id           String   @id @default(uuid())
+  farmId       String
+  farm         Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  recordedDate DateTime @default(now())
+  tempMax      Float    @default(32.0)
+  tempMin      Float    @default(22.0)
+  humidity     Float    @default(65.0)
+  rainfallMm   Float    @default(0.0)
+  windSpeedKmh Float    @default(12.0)
+  riskSummary  String?  @default("Normal season conditions")
+  createdAt    DateTime @default(now())
+
+  @@index([farmId])
+}
+
+model IrrigationRecord {
+  id                 String   @id @default(uuid())
+  fieldId            String
+  field              Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  recordDate         DateTime @default(now())
+  waterVolumeLiters  Float
+  irrigationMethod   String   @default("Drip")
+  durationMinutes    Int      @default(60)
+  remarks            String?
+
+  @@index([fieldId])
+}
+
+model FarmActivity {
+  id            String    @id @default(uuid())
+  cropCycleId   String
+  cropCycle     CropCycle @relation(fields: [cropCycleId], references: [id], onDelete: Cascade)
+  activityType  String    // Sowing, Tilling, Fertilizer, Pesticide, Irrigation, Weeding, Harvesting
+  scheduledDate DateTime
+  completedDate DateTime?
+  isCompleted   Boolean   @default(false)
+  cost          Float     @default(0.0)
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  @@index([cropCycleId])
+}
+
+// ----------------------------------------------------
+// 3. FINANCIALS & EXPENSE TRACKING
+// ----------------------------------------------------
+
+model Expense {
+  id          String     @id @default(uuid())
+  farmerId    String
+  farmer      User       @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  cropCycleId String?
+  cropCycle   CropCycle? @relation(fields: [cropCycleId], references: [id], onDelete: SetNull)
+  category    String     // Seeds, Fertilizers, Labor, Irrigation, Machinery, Fuel, Transport, Other
+  amount      Float
+  expenseDate DateTime   @default(now())
+  description String?
+  receiptUrl  String?
+  createdAt   DateTime   @default(now())
+
+  @@index([farmerId])
+  @@index([cropCycleId])
+}
+
+model Revenue {
+  id           String     @id @default(uuid())
+  farmerId     String
+  farmer       User       @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  cropCycleId  String?
+  cropCycle    CropCycle? @relation(fields: [cropCycleId], references: [id], onDelete: SetNull)
+  buyerName    String
+  quantitySold Float
+  unitPrice    Float
+  totalAmount  Float
+  saleDate     DateTime   @default(now())
+  paymentMode  String     @default("Bank Transfer")
+  createdAt    DateTime   @default(now())
+
+  @@index([farmerId])
+}
+
+// ----------------------------------------------------
+// 4. COMMERCE, MARKETPLACE & ORDERS
+// ----------------------------------------------------
+
+model MarketListing {
+  id                String   @id @default(uuid())
+  farmerId          String
+  farmer            User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  cropName          String
+  variety           String?
+  availableQuantity Float
+  unit              String   @default("Quintals")
+  askingPricePerUnit Float
+  qualityGrade      String   @default("Grade A")
+  harvestDate       DateTime
+  locationName      String
+  imageUrl          String?
+  status            String   @default("ACTIVE") // ACTIVE, NEGOTIATING, SOLD, CANCELLED
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  offers            Offer[]
+  orders            Order[]
+
+  @@index([farmerId])
+  @@index([cropName])
+  @@index([status])
+}
+
+model BuyerRequirement {
+  id                  String   @id @default(uuid())
+  merchantId          String
+  merchant            User     @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  cropName            String
+  requiredQuantity    Float
+  unit                String   @default("Quintals")
+  targetPricePerUnit  Float
+  minimumQuality      String   @default("Grade A")
+  deliveryLocation    String
+  requiredByDate      DateTime
+  status              String   @default("OPEN") // OPEN, MATCHED, FULFILLED, CLOSED
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  offers              Offer[]
+
+  @@index([merchantId])
+  @@index([cropName])
+}
+
+model Offer {
+  id                 String            @id @default(uuid())
+  listingId          String?
+  listing            MarketListing?    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerRequirementId String?
+  buyerRequirement   BuyerRequirement? @relation(fields: [buyerRequirementId], references: [id], onDelete: Cascade)
+  senderUserId       String
+  sender             User              @relation("SentOffers", fields: [senderUserId], references: [id], onDelete: Cascade)
+  receiverUserId     String
+  receiver           User              @relation("ReceivedOffers", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  offeredPrice       Float
+  quantity           Float
+  terms              String?
+  status             String            @default("PENDING") // PENDING, COUNTERED, ACCEPTED, REJECTED, EXPIRED
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  negotiations       NegotiationMessage[]
+
+  @@index([senderUserId])
+  @@index([receiverUserId])
+}
+
+model NegotiationMessage {
+  id               String   @id @default(uuid())
+  offerId          String
+  offer            Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  senderUserId     String
+  sender           User     @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+  message          String
+  proposedPrice    Float?
+  proposedQuantity Float?
+  createdAt        DateTime @default(now())
+
+  @@index([offerId])
+}
+
+model Order {
+  id               String   @id @default(uuid())
+  listingId        String?
+  listing          MarketListing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  buyerId          String
+  buyer            User     @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId         String
+  seller           User     @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: Cascade)
+  cropName         String
+  finalPrice       Float
+  quantity         Float
+  totalAmount      Float
+  status           String   @default("ACCEPTED") // REQUESTED, OFFERED, NEGOTIATING, ACCEPTED, PACKING, IN_TRANSIT, DELIVERED, COMPLETED, CANCELLED
+  paymentStatus    String   @default("PENDING")  // PENDING, PARTIAL, COMPLETED, REFUNDED
+  deliveryAddress  String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  payments         Payment[]
+  transportRequest TransportRequest?
+
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount         Float
+  transactionRef String   @unique
+  paymentMethod  String   @default("NEFT / UPI Gateway")
+  paymentStatus  String   @default("COMPLETED")
+  paidAt         DateTime @default(now())
+
+  @@index([orderId])
+}
+
+// ----------------------------------------------------
+// 5. LOGISTICS, MACHINERY & LABOR
+// ----------------------------------------------------
+
+model TransportRequest {
+  id               String   @id @default(uuid())
+  orderId          String   @unique
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transporterId    String?
+  pickupAddress    String
+  dropoffAddress   String
+  cargoWeightTons  Float
+  pickupDate       DateTime
+  deliveryDate     DateTime?
+  estimatedCost    Float
+  status           String   @default("PENDING") // PENDING, ACCEPTED, IN_TRANSIT, DELIVERED, CANCELLED
+  driverName       String?
+  driverPhone      String?
+  vehicleRegNumber String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  deliveryUpdates  DeliveryUpdate[]
+}
+
+model DeliveryUpdate {
+  id                 String           @id @default(uuid())
+  transportRequestId String
+  transportRequest   TransportRequest @relation(fields: [transportRequestId], references: [id], onDelete: Cascade)
+  statusText         String
+  locationName       String
+  timestamp          DateTime         @default(now())
+
+  @@index([transportRequestId])
+}
+
+model Machinery {
+  id            String   @id @default(uuid())
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  machineryType String   // Tractor, Combine Harvester, Rotavator, Seeder, Drip Layer
+  modelName     String
+  hourlyRate    Float
+  dailyRate     Float
+  location      String
+  isAvailable   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  bookings      MachineryBooking[]
+
+  @@index([ownerId])
+}
+
+model MachineryBooking {
+  id          String    @id @default(uuid())
+  machineryId String
+  machinery   Machinery @relation(fields: [machineryId], references: [id], onDelete: Cascade)
+  renterId    String
+  renter      User      @relation("RenterBookings", fields: [renterId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  totalCost   Float
+  status      String    @default("CONFIRMED") // REQUESTED, CONFIRMED, COMPLETED, CANCELLED
+  createdAt   DateTime  @default(now())
+
+  @@index([machineryId])
+  @@index([renterId])
+}
+
+model LaborJob {
+  id              String   @id @default(uuid())
+  farmerId        String
+  farmer          User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  title           String
+  requiredWorkers Int      @default(3)
+  dailyWage       Float    @default(650.0)
+  startDate       DateTime
+  durationDays    Int      @default(5)
+  description     String
+  status          String   @default("OPEN") // OPEN, FILLED, COMPLETED
+  createdAt       DateTime @default(now())
+
+  applications    LaborApplication[]
+
+  @@index([farmerId])
+}
+
+model LaborApplication {
+  id              String   @id @default(uuid())
+  laborJobId      String
+  laborJob        LaborJob @relation(fields: [laborJobId], references: [id], onDelete: Cascade)
+  workerName      String
+  workerPhone     String
+  experienceYears Int      @default(3)
+  status          String   @default("HIRED") // APPLIED, HIRED, REJECTED
+  createdAt       DateTime @default(now())
+
+  @@index([laborJobId])
+}
+
+// ----------------------------------------------------
+// 6. HEALTH DIAGNOSTICS & EXPERTS
+// ----------------------------------------------------
+
+model CropHealthObservation {
+  id                 String     @id @default(uuid())
+  fieldId            String?
+  field              Field?     @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  cropCycleId        String?
+  cropCycle          CropCycle? @relation(fields: [cropCycleId], references: [id], onDelete: SetNull)
+  observerId         String
+  observer           User       @relation(fields: [observerId], references: [id], onDelete: Cascade)
+  imageUrl           String?
+  symptomDescription String
+  aiPredictionClass  String?
+  aiConfidence       Float?
+  expertReviewStatus String     @default("PENDING") // PENDING, REVIEWED
+  createdAt          DateTime   @default(now())
+
+  expertCases        ExpertCase[]
+
+  @@index([observerId])
+}
+
+model ExpertCase {
+  id             String                @id @default(uuid())
+  observationId  String
+  observation    CropHealthObservation @relation(fields: [observationId], references: [id], onDelete: Cascade)
+  expertId       String
+  expert         User                  @relation(fields: [expertId], references: [id], onDelete: Cascade)
+  diagnosisNotes String
+  prescription   String
+  status         String                @default("RESOLVED") // ASSIGNED, RESOLVED
+  reviewedAt     DateTime              @default(now())
+
+  @@index([observationId])
+  @@index([expertId])
+}
+
+// ----------------------------------------------------
+// 7. PLATFORM, NOTIFICATIONS & AUDIT
+// ----------------------------------------------------
+
+model GovernmentScheme {
+  id          String   @id @default(uuid())
+  schemeName  String   @unique
+  description String
+  eligibility String
+  benefits    String
+  applyUrl    String
+  category    String   // Financial Support, Soil Management, Insurance, Irrigation, Equipment, Development
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  category  String   @default("SYSTEM") // WEATHER, CROP_HEALTH, OFFER, ORDER, PAYMENT, ADVISORY
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  reviewerId   String
+  reviewer     User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  targetUserId String
+  targetUser   User     @relation("ReviewsReceived", fields: [targetUserId], references: [id], onDelete: Cascade)
+  rating       Int      @default(5)
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  @@index([reviewerId])
+  @@index([targetUserId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityName String
+  entityId   String?
+  details    String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+}

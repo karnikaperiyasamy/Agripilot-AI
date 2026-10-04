@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmProfit - AI Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;}
+        .sidebar{width:260px;background:#1e3c2c;color:white;min-height:100vh;position:fixed;left:0;top:0;padding:20px;}
+        .sidebar-header{text-align:center;padding-bottom:20px;border-bottom:2px solid #2ecc71;margin-bottom:20px;}
+        .sidebar .nav-link{color:white;padding:12px 15px;margin:5px 0;border-radius:10px;text-decoration:none;display:block;}
+        .sidebar .nav-link:hover{background:#2ecc71;}
+        .sidebar .nav-link i{margin-right:10px;}
+        .main-content{margin-left:260px;padding:20px;}
+        .top-navbar{background:white;padding:15px 20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+        .ai-card{background:white;border-radius:15px;padding:25px;margin-bottom:20px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+        .ai-card h4{color:#1e3c2c;margin-bottom:20px;border-bottom:2px solid #2ecc71;padding-bottom:10px;}
+        .tip-item{padding:10px;margin-bottom:10px;background:#f8f9fa;border-radius:8px;border-left:3px solid #2ecc71;}
+        .btn-success{background:#2ecc71;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;color:white;}
+        .form-control{padding:10px;border:1px solid #ddd;border-radius:8px;width:100%;margin:10px 0;}
+        .alert-success{background:#d4edda;color:#155724;padding:15px;border-radius:8px;margin-top:15px;}
+        .btn-logout{background:#e74c3c;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;}
+        .loading{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:10px;z-index:9999;}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header"><h3><i class="fas fa-leaf"></i> FarmProfit</h3></div>
+        <a class="nav-link" href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a class="nav-link" href="crops.html"><i class="fas fa-seedling"></i> Crops</a>
+        <a class="nav-link" href="expenses.html"><i class="fas fa-money-bill-wave"></i> Expenses</a>
+        <a class="nav-link" href="profit.html"><i class="fas fa-chart-line"></i> Profit</a>
+        <a class="nav-link" href="schemes.html"><i class="fas fa-hand-holding-usd"></i> Schemes</a>
+        <a class="nav-link" href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+        <a class="nav-link active" href="ai-assistant.html"><i class="fas fa-robot"></i> AI Assistant</a>
+        <a class="nav-link" href="chatbot.html"><i class="fas fa-comment-dots"></i> Chatbot</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-navbar">
+            <span id="userName"></span>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+        <div class="container-fluid"><h2 class="mb-4">AI Farming Assistant</h2>
+            <div class="row"><div class="col-md-6"><div class="ai-card"><h4>🌱 Farming Tips</h4><div id="farmingTips"></div><button class="btn-success mt-3" onclick="loadFarmingTips()">Refresh Tips</button></div></div>
+            <div class="col-md-6"><div class="ai-card"><h4>🌾 Crop Recommendations</h4><select id="soilType" class="form-control"><option>Loamy</option><option>Clayey</option><option>Sandy</option><option>Black</option><option>Red</option></select>
+            <select id="seasonSelect" class="form-control"><option>Kharif (Monsoon)</option><option>Rabi (Winter)</option><option>Summer</option></select><button class="btn-success" onclick="getRecommendations()">Get Recommendations</button><div id="recommendations"></div></div></div>
+            <div class="col-md-12 mt-4"><div class="ai-card"><h4>💰 Profit Improvement Tips</h4><div id="profitTips"></div><button class="btn-success mt-3" onclick="loadProfitTips()">Refresh Tips</button></div></div></div>
+        </div>
+    </div>
+    <div id="loading" class="loading"><div class="spinner-border text-success"></div></div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'index.html';
+        
+        function showLoading() { document.getElementById('loading').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        
+        async function loadFarmingTips() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/ai/farming-tips`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                document.getElementById('farmingTips').innerHTML = (data.tips || []).map(tip => `<div class="tip-item"><i class="fas fa-check-circle text-success me-2"></i>${tip}</div>`).join('');
+            } catch(e) { console.error(e); } finally { hideLoading(); }
+        }
+        
+        async function getRecommendations() {
+            const soilType = document.getElementById('soilType').value;
+            const season = document.getElementById('seasonSelect').value;
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/ai/recommend-crops?soilType=${soilType}&season=${season}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                document.getElementById('recommendations').innerHTML = `<div class="alert-success mt-3"><strong>Recommended Crops:</strong><br>${(data.crops || []).join(', ')}<br><br>${data.message || ''}</div>`;
+            } catch(e) { console.error(e); } finally { hideLoading(); }
+        }
+        
+        async function loadProfitTips() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/ai/profit-tips`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                document.getElementById('profitTips').innerHTML = (data.tips || []).map(tip => `<div class="tip-item"><i class="fas fa-chart-line text-success me-2"></i>${tip}</div>`).join('');
+            } catch(e) { console.error(e); } finally { hideLoading(); }
+        }
+        
+        document.getElementById('userName').innerHTML = `<i class="fas fa-user-circle"></i> Welcome, ${localStorage.getItem('userName') || 'Farmer'}`;
+        loadFarmingTips();
+        loadProfitTips();
+    </script>
+</body>
+</html>
