@@ -53,6 +53,7 @@ model User {
   reviewsReceived   Review[]                 @relation("ReviewsReceived")
   transporterVehicles TransporterVehicle[]
   farmDiaryEntries    FarmDiaryEntry[]
+  fpoMembers          FPOMember[]
   auditLogs         AuditLog[]
 
   @@index([email])
@@ -729,4 +730,75 @@ model AuditLog {
 
   @@index([userId])
   @@index([action])
+}
+
+// ----------------------------------------------------
+// 8. ENTERPRISE, FPO, COLD STORAGE & PARTNER API
+// ----------------------------------------------------
+
+model FPOOrganization {
+  id                 String      @id @default(uuid())
+  name               String      @unique
+  registrationNumber String      @unique
+  state              String      @default("Tamil Nadu")
+  district           String      @default("Coimbatore")
+  totalMembers       Int         @default(120)
+  primaryCrop        String      @default("Paddy / Groundnut")
+  leaderUserId       String
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  members            FPOMember[]
+
+  @@index([state])
+  @@index([district])
+}
+
+model FPOMember {
+  id        String          @id @default(uuid())
+  fpoId     String
+  fpo       FPOOrganization @relation(fields: [fpoId], references: [id], onDelete: Cascade)
+  farmerId  String
+  farmer    User            @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  role      String          @default("MEMBER") // LEADER, DIRECTORS, MEMBER
+  joinedAt  DateTime        @default(now())
+
+  @@index([fpoId])
+  @@index([farmerId])
+}
+
+model ColdStorageUnit {
+  id                   String   @id @default(uuid())
+  name                 String
+  location             String
+  capacityQuintals     Float    @default(5000.0)
+  availableQuintals    Float    @default(2400.0)
+  temperatureCelsius   Float    @default(4.0)
+  costPerQuintalPerDay Float    @default(12.0)
+  contactPhone         String   @default("9842100999")
+  createdAt            DateTime @default(now())
+}
+
+model PartnerApiKey {
+  id               String   @id @default(uuid())
+  organizationName String
+  apiKeyHash       String   @unique
+  scopes           String   @default("read:listings,read:forecasts,write:procurement")
+  rateLimitPerMin  Int      @default(120)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@index([organizationName])
+}
+
+model WebhookSubscription {
+  id               String   @id @default(uuid())
+  organizationName String
+  targetUrl        String
+  secretKey        String
+  eventTypes       String   @default("ORDER_CREATED,SHIPMENT_DELIVERED,DISSEASE_ESCALATED")
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@index([organizationName])
 }

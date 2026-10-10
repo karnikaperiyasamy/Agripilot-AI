@@ -18,6 +18,9 @@ import { ConsumerDashboard } from './pages/ConsumerDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { SchemesPage } from './pages/SchemesPage';
 import { TraceabilityPublicPage } from './pages/TraceabilityPublicPage';
+import { FPOPortalPage } from './pages/FPOPortalPage';
+import { EnterprisePortalPage } from './pages/EnterprisePortalPage';
+import { DeveloperPortalPage } from './pages/DeveloperPortalPage';
 
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -49,6 +52,9 @@ const AppContent: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/schemes" element={<SchemesPage />} />
           <Route path="/trace/:batchCode" element={<TraceabilityPublicPage />} />
+          <Route path="/fpo" element={<FPOPortalPage />} />
+          <Route path="/enterprise" element={<EnterprisePortalPage />} />
+          <Route path="/developer" element={<DeveloperPortalPage />} />
 
           {/* Role Dashboards */}
           <Route

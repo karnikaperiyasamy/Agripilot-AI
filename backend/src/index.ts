@@ -42,6 +42,9 @@ import notificationRoutes from './routes/notificationRoutes';
 import traceabilityRoutes from './routes/traceabilityRoutes';
 import groupBuyingRoutes from './routes/groupBuyingRoutes';
 import diaryRoutes from './routes/diaryRoutes';
+import fpoRoutes from './routes/fpoRoutes';
+import enterpriseRoutes from './routes/enterpriseRoutes';
+import partnerApiRoutes from './routes/partnerApiRoutes';
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
@@ -60,6 +63,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/traceability', traceabilityRoutes);
 app.use('/api/group-buying', groupBuyingRoutes);
 app.use('/api/diary', diaryRoutes);
+app.use('/api/fpo', fpoRoutes);
+app.use('/api/enterprise', enterpriseRoutes);
+app.use('/api/v1', partnerApiRoutes);
 
 // Static Web App Serving (Vite React Build)
 import path from 'path';

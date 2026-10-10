@@ -187,6 +187,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVoice }) => {
               <Link to="/schemes" className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors">
                 {t.nav.schemes}
               </Link>
+              <Link to="/fpo" className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors">
+                FPO Portal
+              </Link>
+              <Link to="/enterprise" className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors">
+                Enterprise B2B
+              </Link>
+              <Link to="/developer" className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors">
+                Partner API
+              </Link>
               {isAuthenticated && (
                 <Link to={getDashboardLink()} className="px-3 py-2 rounded-lg text-sm font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50/80 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition-colors flex items-center space-x-1.5 border border-emerald-200 dark:border-emerald-800">
                   <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
