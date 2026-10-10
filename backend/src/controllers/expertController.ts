@@ -54,8 +54,8 @@ export class ExpertController {
         await prisma.notification.create({
           data: {
             userId: obs.observerId,
-            title: 'Expert Prescription Received',
-            message: `Dr. ${req.user!.name} has verified your crop health sample and submitted a treatment plan.`,
+            title: 'Expert Prescription Received 🩺',
+            message: `Dr. ${req.user!.name} has verified your crop health sample and submitted a treatment plan: ${prescription}`,
             category: 'CROP_HEALTH'
           }
         });
@@ -67,15 +67,29 @@ export class ExpertController {
     }
   }
 
-  // 3. Farmer Submit Query to Expert
+  // 3. Farmer Submit Query / Disease Diagnosis to Expert
   static async submitQuery(req: AuthRequest, res: Response) {
     try {
       const observerId = req.user!.id;
-      const { symptomDescription, fieldId, cropCycleId, imageUrl, aiPredictionClass, aiConfidence } = req.body;
+      const {
+        symptomDescription,
+        fieldId,
+        cropCycleId,
+        imageUrl,
+        aiPredictionClass,
+        aiConfidence = 0.88,
+        recommendedAction,
+        preventionAdvice,
+        riskLevel = 'Medium'
+      } = req.body;
 
       if (!symptomDescription) {
-        return res.status(400).json({ success: false, message: 'Query description is required' });
+        return res.status(400).json({ success: false, message: 'Symptom or query description is required' });
       }
+
+      const confVal = parseFloat(aiConfidence || '0.88');
+      const isUncertain = confVal < 0.75;
+      const statusText = isUncertain ? 'ESCALATED' : 'PENDING';
 
       const observation = await prisma.cropHealthObservation.create({
         data: {
@@ -84,20 +98,23 @@ export class ExpertController {
           cropCycleId: cropCycleId || null,
           symptomDescription,
           imageUrl: imageUrl || null,
-          aiPredictionClass: aiPredictionClass || 'Foliar Inspection Requested',
-          aiConfidence: aiConfidence || 0.92,
-          expertReviewStatus: 'PENDING'
+          aiPredictionClass: aiPredictionClass || (isUncertain ? 'Uncertain Foliar Lesion' : 'Foliar Health Inspection'),
+          aiConfidence: confVal,
+          riskLevel: isUncertain ? 'High' : riskLevel,
+          recommendedAction: recommendedAction || 'Apply organic neem extract and isolate infected leaves',
+          preventionAdvice: preventionAdvice || 'Maintain optimal crop spacing and avoid field-to-field flooding',
+          expertReviewStatus: statusText
         }
       });
 
-      // Notify Experts
+      // Notify Experts if escalated or submitted
       const experts = await prisma.user.findMany({ where: { role: 'EXPERT' } });
       for (const exp of experts) {
         await prisma.notification.create({
           data: {
             userId: exp.id,
-            title: 'New Farmer Consultation Request 🌾',
-            message: `${req.user!.name} submitted a crop health consultation request: "${symptomDescription.substring(0, 60)}..."`,
+            title: isUncertain ? '⚠️ Low-Confidence AI Diagnosis Escalated' : 'New Farmer Consultation Request 🌾',
+            message: `${req.user!.name} submitted a crop health consultation (${aiPredictionClass || 'Foliar Lesion'}, Conf: ${Math.round(confVal * 100)}%): "${symptomDescription.substring(0, 60)}..."`,
             category: 'CROP_HEALTH'
           }
         });
@@ -105,8 +122,11 @@ export class ExpertController {
 
       return res.status(201).json({
         success: true,
-        message: 'Your query has been escalated to agricultural experts. You will be notified when an expert prescribes a treatment plan.',
-        data: observation
+        message: isUncertain
+          ? 'AI diagnosis confidence was uncertain (<75%). Case automatically escalated to certified agricultural experts for review.'
+          : 'Your crop health observation has been recorded and submitted to agricultural experts.',
+        data: observation,
+        isUncertain
       });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });

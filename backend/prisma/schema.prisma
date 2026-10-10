@@ -51,6 +51,8 @@ model User {
   notifications     Notification[]
   reviewsGiven      Review[]                 @relation("ReviewsGiven")
   reviewsReceived   Review[]                 @relation("ReviewsReceived")
+  transporterVehicles TransporterVehicle[]
+  farmDiaryEntries    FarmDiaryEntry[]
   auditLogs         AuditLog[]
 
   @@index([email])
@@ -195,6 +197,7 @@ model CropCycle {
   expenses             Expense[]
   revenues             Revenue[]
   healthObservations   CropHealthObservation[]
+  farmDiaryEntries     FarmDiaryEntry[]
 
   @@index([fieldId])
   @@index([cropId])
@@ -540,7 +543,10 @@ model CropHealthObservation {
   symptomDescription String
   aiPredictionClass  String?
   aiConfidence       Float?
-  expertReviewStatus String     @default("PENDING") // PENDING, REVIEWED
+  riskLevel          String?    @default("Medium")
+  recommendedAction  String?
+  preventionAdvice   String?
+  expertReviewStatus String     @default("PENDING") // PENDING, REVIEWED, ESCALATED
   createdAt          DateTime   @default(now())
 
   expertCases        ExpertCase[]
@@ -564,18 +570,123 @@ model ExpertCase {
 }
 
 // ----------------------------------------------------
-// 7. PLATFORM, NOTIFICATIONS & AUDIT
+// 7. PLATFORM, NOTIFICATIONS, TRACEABILITY, GROUP BUYING & AUDIT
 // ----------------------------------------------------
 
 model GovernmentScheme {
-  id          String   @id @default(uuid())
-  schemeName  String   @unique
-  description String
-  eligibility String
-  benefits    String
-  applyUrl    String
-  category    String   // Financial Support, Soil Management, Insurance, Irrigation, Equipment, Development
-  createdAt   DateTime @default(now())
+  id             String   @id @default(uuid())
+  schemeName     String   @unique
+  description    String
+  eligibility    String
+  benefits       String
+  applyUrl       String
+  category       String   // Financial Support, Soil Management, Insurance, Irrigation, Equipment, Development
+  state          String   @default("All India")
+  farmerCategory String   @default("All Farmers")
+  cropCategory   String   @default("All Crops")
+  farmType       String   @default("All Types")
+  requiredDocs   String   @default("Aadhaar Card, Land Record / Patta, Bank Passbook")
+  officialSource String   @default("Ministry of Agriculture & Farmers Welfare (https://agricoop.gov.in)")
+  lastVerified   DateTime @default(now())
+  createdAt      DateTime @default(now())
+}
+
+model BatchTraceability {
+  id               String   @id @default(uuid())
+  batchCode        String   @unique
+  farmerId         String
+  farmerName       String
+  farmName         String
+  location         String
+  cropName         String
+  variety          String?
+  harvestDate      DateTime
+  qualityGrade     String   @default("Grade A")
+  quantityQuintals Float
+  testingDetails   String?  @default("Pesticide Residue Free / Organic Certified")
+  buyerName        String?  @default("AgriPilot Wholesale Network")
+  transportStatus  String?  @default("COMPLETED")
+  deliveryStatus   String?  @default("DELIVERED")
+  auditTrailJson   String   // JSON string array of chronological audit steps
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([batchCode])
+  @@index([farmerId])
+}
+
+model TransporterVehicle {
+  id                 String   @id @default(uuid())
+  transporterId      String
+  transporter        User     @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  vehicleName        String
+  vehicleType        String   // Mini Truck, 10-Wheeler, Refrigerated Van, Tractor Trailer
+  registrationNumber String
+  capacityKg         Float
+  hasRefrigeration   Boolean  @default(false)
+  currentServiceArea String   @default("Regional")
+  isAvailable        Boolean  @default(true)
+  createdAt          DateTime @default(now())
+
+  @@index([transporterId])
+}
+
+model GroupPurchasePool {
+  id                   String   @id @default(uuid())
+  title                String
+  category             String   // Seeds, Fertilizers, Equipment, Chemicals
+  itemDetails          String
+  basePricePerUnit     Float
+  discountPricePerUnit Float
+  unit                 String   @default("Kg")
+  targetQuantity       Float
+  currentQuantity      Float    @default(0.0)
+  minMembers           Int      @default(5)
+  closingDate          DateTime
+  status               String   @default("OPEN") // OPEN, FULFILLED, COMPLETED, CANCELLED
+  createdByUserId      String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  members              GroupPurchaseMember[]
+
+  @@index([status])
+  @@index([category])
+}
+
+model GroupPurchaseMember {
+  id            String            @id @default(uuid())
+  poolId        String
+  pool          GroupPurchasePool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  farmerId      String
+  farmerName    String
+  quantity      Float
+  totalCost     Float
+  paymentStatus String            @default("PENDING") // PENDING, PAID
+  joinedAt      DateTime          @default(now())
+
+  @@index([poolId])
+  @@index([farmerId])
+}
+
+model FarmDiaryEntry {
+  id             String     @id @default(uuid())
+  farmerId       String
+  farmer         User       @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  cropCycleId    String?
+  cropCycle      CropCycle? @relation(fields: [cropCycleId], references: [id], onDelete: SetNull)
+  cropName       String
+  activityType   String     // Sowing, Irrigation, Fertilizer, Pesticide, Labour, Harvest, Expense
+  activityDate   DateTime   @default(now())
+  details        String
+  quantityOrArea String?
+  costAmount     Float      @default(0.0)
+  yieldQuintals  Float?
+  sellingPrice   Float?
+  createdAt      DateTime   @default(now())
+
+  @@index([farmerId])
+  @@index([cropCycleId])
 }
 
 model Notification {

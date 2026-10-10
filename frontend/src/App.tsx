@@ -17,6 +17,7 @@ import { ExpertDashboard } from './pages/ExpertDashboard';
 import { ConsumerDashboard } from './pages/ConsumerDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { SchemesPage } from './pages/SchemesPage';
+import { TraceabilityPublicPage } from './pages/TraceabilityPublicPage';
 
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -47,6 +48,7 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/schemes" element={<SchemesPage />} />
+          <Route path="/trace/:batchCode" element={<TraceabilityPublicPage />} />
 
           {/* Role Dashboards */}
           <Route

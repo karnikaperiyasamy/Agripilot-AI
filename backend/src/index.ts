@@ -39,6 +39,9 @@ app.get('/api/health', (req, res) => {
 });
 
 import notificationRoutes from './routes/notificationRoutes';
+import traceabilityRoutes from './routes/traceabilityRoutes';
+import groupBuyingRoutes from './routes/groupBuyingRoutes';
+import diaryRoutes from './routes/diaryRoutes';
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
@@ -54,6 +57,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/traceability', traceabilityRoutes);
+app.use('/api/group-buying', groupBuyingRoutes);
+app.use('/api/diary', diaryRoutes);
 
 // Static Web App Serving (Vite React Build)
 import path from 'path';

@@ -36,6 +36,16 @@ import { BarGraphWidget } from '../components/charts/BarGraphWidget';
 import { AreaChartWidget } from '../components/charts/AreaChartWidget';
 import { RegionReachCard } from '../components/charts/RegionReachCard';
 import { TransactionTableWidget } from '../components/TransactionTableWidget';
+import { ProfitSimulatorModal } from '../components/ProfitSimulatorModal';
+import { WhatToGrowModal } from '../components/WhatToGrowModal';
+import { FarmRiskScoreCard } from '../components/FarmRiskScoreCard';
+import { WaterManagementCard } from '../components/WaterManagementCard';
+import { PestForecastCard } from '../components/PestForecastCard';
+import { DigitalFarmDiaryModal } from '../components/DigitalFarmDiaryModal';
+import { GroupBuyingModal } from '../components/GroupBuyingModal';
+import { TraceabilityModal } from '../components/TraceabilityModal';
+import { LogisticsLoadPoolingCard } from '../components/LogisticsLoadPoolingCard';
+import { OfferEvaluationModal } from '../components/OfferEvaluationModal';
 
 export const FarmerDashboard: React.FC = () => {
   const { user, token } = useAuth();
@@ -87,6 +97,14 @@ export const FarmerDashboard: React.FC = () => {
   const [showExpertQueryModal, setShowExpertQueryModal] = useState(false);
   const [expertQueryDesc, setExpertQueryDesc] = useState('');
   const [expertQuerySubmitting, setExpertQuerySubmitting] = useState(false);
+
+  // New AI Decision Support Modal States
+  const [showProfitSimulator, setShowProfitSimulator] = useState(false);
+  const [showWhatToGrow, setShowWhatToGrow] = useState(false);
+  const [showDigitalDiary, setShowDigitalDiary] = useState(false);
+  const [showGroupBuying, setShowGroupBuying] = useState(false);
+  const [showTraceability, setShowTraceability] = useState(false);
+  const [selectedOfferForEval, setSelectedOfferForEval] = useState<any>(null);
 
   const handleExpertQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -461,6 +479,41 @@ export const FarmerDashboard: React.FC = () => {
               <Plus className="w-4 h-4 text-emerald-400" />
               <span>{t.cropModal.registerBtn}</span>
             </button>
+            <button
+              onClick={() => setShowProfitSimulator(true)}
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center space-x-1.5 shadow-lg transition-all hover:scale-105"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-200" />
+              <span>🧮 Profit Simulator</span>
+            </button>
+            <button
+              onClick={() => setShowWhatToGrow(true)}
+              className="px-4 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center space-x-1.5 shadow-lg transition-all hover:scale-105"
+            >
+              <Compass className="w-4 h-4 text-teal-200" />
+              <span>🌱 What to Grow?</span>
+            </button>
+            <button
+              onClick={() => setShowDigitalDiary(true)}
+              className="px-4 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-white font-bold rounded-xl text-xs sm:text-sm border border-slate-700/80 backdrop-blur-md transition-all flex items-center space-x-1.5"
+            >
+              <FileCheck className="w-4 h-4 text-emerald-400" />
+              <span>📖 Digital Diary</span>
+            </button>
+            <button
+              onClick={() => setShowGroupBuying(true)}
+              className="px-4 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-white font-bold rounded-xl text-xs sm:text-sm border border-slate-700/80 backdrop-blur-md transition-all flex items-center space-x-1.5"
+            >
+              <Handshake className="w-4 h-4 text-emerald-400" />
+              <span>🤝 Group Buying</span>
+            </button>
+            <button
+              onClick={() => setShowTraceability(true)}
+              className="px-4 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-white font-bold rounded-xl text-xs sm:text-sm border border-slate-700/80 backdrop-blur-md transition-all flex items-center space-x-1.5"
+            >
+              <PackageCheck className="w-4 h-4 text-emerald-400" />
+              <span>📦 QR Traceability</span>
+            </button>
           </div>
         </div>
       </div>
@@ -532,6 +585,14 @@ export const FarmerDashboard: React.FC = () => {
             );
           })}
         </div>
+      </section>
+
+      {/* 1.5 AI DECISION SUPPORT ECOSYSTEM MODULES */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <FarmRiskScoreCard />
+        <WaterManagementCard />
+        <PestForecastCard />
+        <LogisticsLoadPoolingCard />
       </section>
 
       {/* 2. FARMTWIN AI DIGITAL TWIN VISUALIZER */}
@@ -1540,6 +1601,33 @@ export const FarmerDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* DECISION SUPPORT ECOSYSTEM MODALS */}
+      <ProfitSimulatorModal
+        isOpen={showProfitSimulator}
+        onClose={() => setShowProfitSimulator(false)}
+      />
+      <WhatToGrowModal
+        isOpen={showWhatToGrow}
+        onClose={() => setShowWhatToGrow(false)}
+      />
+      <DigitalFarmDiaryModal
+        isOpen={showDigitalDiary}
+        onClose={() => setShowDigitalDiary(false)}
+      />
+      <GroupBuyingModal
+        isOpen={showGroupBuying}
+        onClose={() => setShowGroupBuying(false)}
+      />
+      <TraceabilityModal
+        isOpen={showTraceability}
+        onClose={() => setShowTraceability(false)}
+      />
+      <OfferEvaluationModal
+        isOpen={!!selectedOfferForEval}
+        offer={selectedOfferForEval}
+        onClose={() => setSelectedOfferForEval(null)}
+      />
     </div>
   </div>
 );

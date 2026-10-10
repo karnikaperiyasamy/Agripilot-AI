@@ -160,14 +160,16 @@ export class FarmerController {
           const farm = await prisma.farm.create({
             data: { farmerId, name: 'Green Valley Farm', locationName: 'Ludhiana Farm Gate' }
           });
-          field = await prisma.field.create({
-            data: { farmId: farm.id, name: 'Main Field', areaAcres: area ? parseFloat(area) : 5.0 }
+          const createdField = await prisma.field.create({
+            data: { farmId: farm.id, name: 'Main Field', areaAcres: area ? parseFloat(area) : 5.0 },
+            include: { farm: true }
           });
+          field = createdField;
           locationName = farm.locationName;
         } else {
           locationName = field.farm.locationName;
         }
-        targetFieldId = field.id;
+        targetFieldId = field!.id;
       }
 
       const cycle = await prisma.cropCycle.create({
@@ -185,8 +187,8 @@ export class FarmerController {
         include: { crop: true, field: true }
       });
 
-      // Auto-publish to ProduceListing marketplace so it is instantly visible to Merchants & Consumers
-      await prisma.produceListing.create({
+      // Auto-publish to MarketListing marketplace so it is instantly visible to Merchants & Consumers
+      await prisma.marketListing.create({
         data: {
           farmerId,
           cropName,
@@ -195,8 +197,9 @@ export class FarmerController {
           unit: 'Quintals',
           askingPricePerUnit: marketPrice ? parseFloat(marketPrice) : 3000.0,
           qualityGrade: 'Grade A',
+          harvestDate: expectedHarvestDate ? new Date(expectedHarvestDate) : new Date(Date.now() + 120 * 86400000),
           locationName: locationName,
-          status: 'AVAILABLE'
+          status: 'ACTIVE'
         }
       });
 
