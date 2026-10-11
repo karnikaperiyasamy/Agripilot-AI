@@ -26,8 +26,20 @@ export const ExpertDashboard: React.FC = () => {
     } else {
       document.body.style.overflow = 'unset';
     }
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedCase(null);
+      }
+    };
+
+    if (selectedCase) {
+      window.addEventListener('keydown', handleKey);
+    }
+
     return () => {
       document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKey);
     };
   }, [selectedCase]);
 
@@ -157,9 +169,26 @@ export const ExpertDashboard: React.FC = () => {
 
       {/* PRESCRIPTION MODAL */}
       {selectedCase && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-lg text-slate-900">{t.expert.modalTitle}</h3>
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 flex items-start justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedCase(null);
+          }}
+        >
+          <div
+            className="relative bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl my-4 sm:my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-lg text-slate-900">{t.expert.modalTitle}</h3>
+              <button
+                type="button"
+                onClick={() => setSelectedCase(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handlePrescribe} className="space-y-3 text-xs">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">{t.expert.diagLabel}</label>

@@ -65,8 +65,22 @@ export const MerchantDashboard: React.FC = () => {
     } else {
       document.body.style.overflow = 'unset';
     }
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowReqModal(false);
+        setMatchedRequirement(null);
+        setSelectedListing(null);
+      }
+    };
+
+    if (isAnyMerchantModalOpen) {
+      window.addEventListener('keydown', handleKey);
+    }
+
     return () => {
       document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKey);
     };
   }, [isAnyMerchantModalOpen]);
 
@@ -605,9 +619,26 @@ export const MerchantDashboard: React.FC = () => {
 
       {/* MODAL 1: POST REQUIREMENT */}
       {showReqModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-lg text-slate-900">{t.merchant.modalReqTitle}</h3>
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 flex items-start justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowReqModal(false);
+          }}
+        >
+          <div
+            className="relative bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl my-4 sm:my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-lg text-slate-900">{t.merchant.modalReqTitle}</h3>
+              <button
+                type="button"
+                onClick={() => setShowReqModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleCreateRequirement} className="space-y-3 text-xs">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">{t.merchant.cropName}</label>
@@ -675,8 +706,16 @@ export const MerchantDashboard: React.FC = () => {
 
       {/* MODAL 2: AI SMART MATCH RESULTS */}
       {matchedRequirement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 flex items-start justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setMatchedRequirement(null);
+          }}
+        >
+          <div
+            className="relative bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 border border-slate-200 shadow-2xl my-4 sm:my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{t.merchant.matchModalHeader}</span>
@@ -684,7 +723,13 @@ export const MerchantDashboard: React.FC = () => {
                   {t.merchant.matchesFor} {translateDynamic(matchedRequirement.cropName)} ({matchedRequirement.requiredQuantity} {t.units.qtl})
                 </h3>
               </div>
-              <button onClick={() => setMatchedRequirement(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+              <button
+                type="button"
+                onClick={() => setMatchedRequirement(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 text-sm font-bold"
+              >
+                ✕
+              </button>
             </div>
 
             {matchLoading ? (
@@ -713,15 +758,42 @@ export const MerchantDashboard: React.FC = () => {
                 {t.merchant.noMatches}
               </div>
             )}
+
+            <div className="flex justify-end pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setMatchedRequirement(null)}
+                className="px-4 py-2 border border-slate-300 rounded-lg font-semibold text-slate-700 hover:bg-slate-50 text-xs"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* MODAL 3: MAKE OFFER */}
       {selectedListing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-lg text-slate-900">{t.merchant.offerModalTitle} {translateDynamic(selectedListing.cropName)}</h3>
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 flex items-start justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedListing(null);
+          }}
+        >
+          <div
+            className="relative bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl my-4 sm:my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-lg text-slate-900">{t.merchant.offerModalTitle} {translateDynamic(selectedListing.cropName)}</h3>
+              <button
+                type="button"
+                onClick={() => setSelectedListing(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleSendOffer} className="space-y-3 text-xs">
               <div className="p-3 bg-slate-50 rounded-lg text-slate-600 space-y-0.5">
                 <div>{t.merchant.farmerAsking} <strong>Rs. {selectedListing.askingPricePerUnit}/{t.units.qtl}</strong></div>

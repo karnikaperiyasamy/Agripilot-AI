@@ -24,8 +24,20 @@ export const EnterprisePortalPage: React.FC = () => {
     } else {
       document.body.style.overflow = 'unset';
     }
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowIntentModal(false);
+      }
+    };
+
+    if (showIntentModal) {
+      window.addEventListener('keydown', handleKey);
+    }
+
     return () => {
       document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKey);
     };
   }, [showIntentModal]);
 
@@ -186,9 +198,26 @@ export const EnterprisePortalPage: React.FC = () => {
 
       {/* Procurement Intent Modal */}
       {showIntentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Publish Enterprise Bulk Procurement Intent</h3>
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 flex items-start justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowIntentModal(false);
+          }}
+        >
+          <div
+            className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl my-4 sm:my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Publish Enterprise Bulk Procurement Intent</h3>
+              <button
+                type="button"
+                onClick={() => setShowIntentModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleCreateIntent} className="space-y-3 text-xs">
               <div>
                 <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Buyer Organization</label>
