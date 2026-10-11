@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Sparkles, X, Compass, CheckCircle2, AlertTriangle, Droplets, ArrowRight } from 'lucide-react';
 
@@ -19,6 +19,17 @@ export const WhatToGrowModal: React.FC<WhatToGrowModalProps> = ({ isOpen, onClos
 
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

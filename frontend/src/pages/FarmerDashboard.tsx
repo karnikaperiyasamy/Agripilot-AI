@@ -149,6 +149,19 @@ export const FarmerDashboard: React.FC = () => {
   const [publishLocation, setPublishLocation] = useState('Ludhiana Farm Gate');
   const [publishing, setPublishing] = useState(false);
 
+  const isAnyInlineModalOpen = showAddExpense || showAddCrop || showDiseaseModal || !!publishCropModal || showExpertQueryModal;
+
+  useEffect(() => {
+    if (isAnyInlineModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isAnyInlineModalOpen]);
+
   useEffect(() => {
     fetchDashboardData();
   }, [token]);
@@ -1264,8 +1277,8 @@ export const FarmerDashboard: React.FC = () => {
       {/* MODALS */}
       {/* 1. Add Expense Modal */}
       {showAddExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900">{t.expenseModal.title}</h3>
             <form onSubmit={handleAddExpense} className="space-y-3 text-xs">
               <div>
@@ -1330,8 +1343,8 @@ export const FarmerDashboard: React.FC = () => {
 
       {/* 2. Add Crop Modal */}
       {showAddCrop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900">{t.cropModal.title}</h3>
             <form onSubmit={handleAddCrop} className="space-y-3 text-xs">
               <div>
@@ -1404,8 +1417,8 @@ export const FarmerDashboard: React.FC = () => {
 
       {/* 3. Crop Disease Scanner Modal */}
       {showDiseaseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-lg text-slate-900 flex items-center space-x-2">
                 <Camera className="w-5 h-5 text-emerald-600" />
@@ -1467,8 +1480,8 @@ export const FarmerDashboard: React.FC = () => {
 
       {/* 4. Publish Crop to Marketplace Modal */}
       {publishCropModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900">{t.cropsSection.publishModalTitle}</h3>
             <p className="text-xs text-slate-500">
               {translateDynamic(publishCropModal.cropName)} ({translateDynamic(publishCropModal.variety)})
@@ -1543,8 +1556,8 @@ export const FarmerDashboard: React.FC = () => {
 
       {/* EXPERT CONSULTATION QUERY MODAL */}
       {showExpertQueryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
                 <UserCheck className="w-5 h-5 text-amber-600" />

@@ -21,6 +21,17 @@ export const FPOPortalPage: React.FC = () => {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
+    if (showCreateModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showCreateModal]);
+
+  useEffect(() => {
     fetchFpos();
   }, [token]);
 
@@ -182,8 +193,8 @@ export const FPOPortalPage: React.FC = () => {
 
       {/* Create FPO Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">Register New FPO Organization</h3>
             <form onSubmit={handleCreateFPO} className="space-y-3 text-xs">
               <div>

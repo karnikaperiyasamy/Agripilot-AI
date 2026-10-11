@@ -21,7 +21,15 @@ export const DigitalFarmDiaryModal: React.FC<DigitalFarmDiaryModalProps> = ({ is
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) fetchEntries();
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      fetchEntries();
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen, token]);
 
   const fetchEntries = async () => {

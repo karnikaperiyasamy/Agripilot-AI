@@ -20,10 +20,13 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({ isOpen
 
   useEffect(() => {
     if (!isOpen) {
+      document.body.style.overflow = 'unset';
       stopListening();
       stopSpeaking();
       return;
     }
+
+    document.body.style.overflow = 'hidden';
 
     // Initialize Web Speech Recognition
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;

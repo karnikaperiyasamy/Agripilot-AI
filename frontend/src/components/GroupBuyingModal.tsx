@@ -19,7 +19,15 @@ export const GroupBuyingModal: React.FC<GroupBuyingModalProps> = ({ isOpen, onCl
   const [joining, setJoining] = useState(false);
 
   useEffect(() => {
-    if (isOpen) fetchPools();
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      fetchPools();
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   const fetchPools = async () => {

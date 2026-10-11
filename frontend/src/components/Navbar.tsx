@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Language } from '../i18n/translations';
-import { Sprout, Mic, Globe, LogOut, UserCircle, Activity, ChevronDown, Bell, CheckCheck, Clock, Sun, Moon } from 'lucide-react';
+import { Sprout, Mic, Globe, LogOut, UserCircle, Activity, ChevronDown, Bell, CheckCheck, Clock, Sun, Moon, Menu, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface NotificationItem {
@@ -133,6 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVoice }) => {
   const { language, setLanguage, t, translateDynamic } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLanguageChange = (lang: Language) => {
@@ -323,9 +324,61 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVoice }) => {
                 </Link>
               </div>
             )}
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-4 space-y-2 shadow-lg animate-in fade-in">
+          <Link
+            to="/schemes"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
+          >
+            {t.nav.schemes}
+          </Link>
+          <Link
+            to="/fpo"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
+          >
+            FPO Portal
+          </Link>
+          <Link
+            to="/enterprise"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
+          >
+            Enterprise B2B
+          </Link>
+          <Link
+            to="/developer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
+          >
+            Partner API
+          </Link>
+          {isAuthenticated && (
+            <Link
+              to={getDashboardLink()}
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50/80 dark:bg-emerald-950/60"
+            >
+              {t.nav.dashboard}
+            </Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 };

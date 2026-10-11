@@ -19,6 +19,17 @@ export const EnterprisePortalPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (showIntentModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showIntentModal]);
+
+  useEffect(() => {
     fetchEnterpriseData();
   }, [token]);
 
@@ -175,8 +186,8 @@ export const EnterprisePortalPage: React.FC = () => {
 
       {/* Procurement Intent Modal */}
       {showIntentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">Publish Enterprise Bulk Procurement Intent</h3>
             <form onSubmit={handleCreateIntent} className="space-y-3 text-xs">
               <div>

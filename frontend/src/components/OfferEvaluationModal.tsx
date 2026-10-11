@@ -11,6 +11,17 @@ export const OfferEvaluationModal: React.FC<OfferEvaluationModalProps> = ({ isOp
   const [loading, setLoading] = useState(false);
   const [evaluation, setEvaluation] = useState<any>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen || !offer) return null;
 
   const handleEvaluate = async () => {

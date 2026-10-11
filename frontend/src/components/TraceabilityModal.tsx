@@ -21,6 +21,17 @@ export const TraceabilityModal: React.FC<TraceabilityModalProps> = ({ isOpen, on
   const [createdBatch, setCreatedBatch] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleCreate = async (e: React.FormEvent) => {

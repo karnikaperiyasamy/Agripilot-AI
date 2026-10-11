@@ -32,6 +32,17 @@ export const TransporterDashboard: React.FC = () => {
   const [newStatus, setNewStatus] = useState('IN_TRANSIT');
 
   useEffect(() => {
+    if (selectedReq) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedReq]);
+
+  useEffect(() => {
     fetchLogisticsData();
   }, [token]);
 
@@ -377,8 +388,8 @@ export const TransporterDashboard: React.FC = () => {
 
       {/* CHECKPOINT MODAL */}
       {selectedReq && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900">{t.transporter.modalTitle}</h3>
             <form onSubmit={handlePostUpdate} className="space-y-3 text-xs">
               <div>

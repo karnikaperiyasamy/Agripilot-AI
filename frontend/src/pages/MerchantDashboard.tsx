@@ -57,6 +57,19 @@ export const MerchantDashboard: React.FC = () => {
   const [offerQty, setOfferQty] = useState('');
   const [offerTerms, setOfferTerms] = useState('Payment within 48h of QC delivery');
 
+  const isAnyMerchantModalOpen = showReqModal || !!matchedRequirement || !!selectedListing;
+
+  useEffect(() => {
+    if (isAnyMerchantModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isAnyMerchantModalOpen]);
+
   useEffect(() => {
     fetchMerchantData();
   }, [token]);
@@ -592,8 +605,8 @@ export const MerchantDashboard: React.FC = () => {
 
       {/* MODAL 1: POST REQUIREMENT */}
       {showReqModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900">{t.merchant.modalReqTitle}</h3>
             <form onSubmit={handleCreateRequirement} className="space-y-3 text-xs">
               <div>
@@ -662,8 +675,8 @@ export const MerchantDashboard: React.FC = () => {
 
       {/* MODAL 2: AI SMART MATCH RESULTS */}
       {matchedRequirement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{t.merchant.matchModalHeader}</span>
@@ -706,8 +719,8 @@ export const MerchantDashboard: React.FC = () => {
 
       {/* MODAL 3: MAKE OFFER */}
       {selectedListing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-900">{t.merchant.offerModalTitle} {translateDynamic(selectedListing.cropName)}</h3>
             <form onSubmit={handleSendOffer} className="space-y-3 text-xs">
               <div className="p-3 bg-slate-50 rounded-lg text-slate-600 space-y-0.5">

@@ -25,6 +25,17 @@ export const ProfitSimulatorModal: React.FC<ProfitSimulatorModalProps> = ({ isOp
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSimulate = async (e: React.FormEvent) => {

@@ -52,6 +52,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [buyerAccountNum, setBuyerAccountNum] = useState('');
   const [buyerIfsc, setBuyerIfsc] = useState('');
 
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const totalPayable = cropAmount + transportAmount;
