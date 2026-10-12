@@ -1,0 +1,87 @@
+{
+  "model_name": "AgriPilot ML Crop Recommendation Engine",
+  "architecture": "StandardScaler + RandomForestClassifier(n_estimators=100)",
+  "version": "1.0.0",
+  "trained_at": "2026-10-11T08:29:47.315065Z",
+  "features": [
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+  ],
+  "target_classes": [
+    "apple",
+    "banana",
+    "blackgram",
+    "chickpea",
+    "coconut",
+    "coffee",
+    "cotton",
+    "grapes",
+    "jute",
+    "kidneybeans",
+    "lentil",
+    "maize",
+    "mango",
+    "mothbeans",
+    "mungbean",
+    "muskmelon",
+    "orange",
+    "papaya",
+    "pigeonpeas",
+    "pomegranate",
+    "rice",
+    "watermelon"
+  ],
+  "num_classes": 22,
+  "total_samples": 2200,
+  "train_samples": 1760,
+  "test_samples": 440,
+  "benchmark_comparison": {
+    "Gaussian Naive Bayes (Baseline 1)": {
+      "accuracy": 98.86,
+      "f1_weighted": 98.87,
+      "precision": 98.9,
+      "recall": 98.86
+    },
+    "Decision Tree Classifier (Baseline 2)": {
+      "accuracy": 94.09,
+      "f1_weighted": 94.08,
+      "precision": 94.21,
+      "recall": 94.09
+    },
+    "Logistic Regression (Baseline 3)": {
+      "accuracy": 97.95,
+      "f1_weighted": 97.94,
+      "precision": 98.02,
+      "recall": 97.95
+    },
+    "Random Forest Classifier (Selected)": {
+      "accuracy": 98.64,
+      "f1_weighted": 98.64,
+      "precision": 98.68,
+      "recall": 98.64
+    }
+  },
+  "final_metrics": {
+    "accuracy_percent": 98.64,
+    "f1_score_percent": 98.64
+  },
+  "feature_importances": {
+    "N": 0.1249,
+    "P": 0.1462,
+    "K": 0.1621,
+    "temperature": 0.0753,
+    "humidity": 0.2067,
+    "ph": 0.0543,
+    "rainfall": 0.2305
+  },
+  "limitations": [
+    "Trained on agronomic agro-climatic envelopes; field microclimates and pest pressures must be verified locally.",
+    "Soil electrical conductivity (EC) and organic carbon (OC) are not included in baseline dataset.",
+    "Recommendations in Tamil Nadu require verification against local TNAU crop calendar."
+  ]
+}

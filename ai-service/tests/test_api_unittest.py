@@ -1,4 +1,7 @@
+import sys
+import os
 import unittest
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -156,6 +159,64 @@ class TestAgriTwinAIService(unittest.TestCase):
         data = res.json()
         self.assertEqual(data["recommended_scenario"], "Precision Drip + Storage")
         self.assertGreater(data["expected_profit_gain"], 0)
+
+    def test_crop_recommendation_ml_valid(self):
+        payload = {
+            "N": 85.0,
+            "P": 45.0,
+            "K": 40.0,
+            "temperature": 24.5,
+            "humidity": 82.0,
+            "ph": 6.5,
+            "rainfall": 220.0
+        }
+        res = self.client.post("/api/ml/recommend-crop", json=payload)
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn("recommended_crop", data)
+        self.assertEqual(data["recommended_crop"], "rice")
+        self.assertEqual(len(data["top_candidates"]), 3)
+        self.assertGreater(data["confidence_percent"], 50.0)
+
+    def test_crop_recommendation_ml_validation_error(self):
+        # Negative N should trigger Pydantic validation error (422)
+        payload = {
+            "N": -10.0,
+            "P": 45.0,
+            "K": 40.0,
+            "temperature": 24.5,
+            "humidity": 82.0,
+            "ph": 6.5,
+            "rainfall": 220.0
+        }
+        res = self.client.post("/api/ml/recommend-crop", json=payload)
+        self.assertEqual(res.status_code, 422)
+
+    def test_disease_classification_empty_and_valid(self):
+        import io
+        from PIL import Image
+
+        # 1. Empty image payload should return 400
+        res_empty = self.client.post("/api/ml/classify-disease", files={"file": ("empty.jpg", b"", "image/jpeg")})
+        self.assertEqual(res_empty.status_code, 400)
+
+        # 2. Valid synthetic leaf image should return 200 with neural features
+        img = Image.new("RGB", (64, 64), color=(34, 139, 34))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        valid_bytes = buf.getvalue()
+
+        res_valid = self.client.post(
+            "/api/ml/classify-disease",
+            files={"file": ("leaf.jpg", valid_bytes, "image/jpeg")},
+            data={"crop_hint": "Rice"}
+        )
+        self.assertEqual(res_valid.status_code, 200)
+        data = res_valid.json()
+        self.assertIn("predicted_class", data)
+        self.assertIn("confidence", data)
+        self.assertIn("top_classes", data)
+        self.assertIn("symptoms", data)
 
 if __name__ == "__main__":
     unittest.main()

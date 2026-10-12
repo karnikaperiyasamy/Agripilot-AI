@@ -38,47 +38,10 @@ router.post('/simulate-decision', AIController.simulateDecision);
 router.get('/models/status', AIController.getModelStatus);
 router.get('/models/registry', AIController.getModelRegistry);
 
-// Disease upload multipart forwarder
-router.post('/classify-disease', upload.single('file'), async (req: Request, res: Response) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Crop leaf image file is required' });
-    }
-
-    const form = new FormData();
-    form.append('file', req.file.buffer, {
-      filename: req.file.originalname || 'leaf.jpg',
-      contentType: req.file.mimetype || 'image/jpeg'
-    });
-    form.append('crop_hint', (req.body.crop_hint || 'Rice').toString());
-
-    const mlResponse = await axios.post(`${ENV.ML_SERVICE_URL}/api/ml/classify-disease`, form, {
-      headers: form.getHeaders(),
-      timeout: 15000
-    });
-
-    return res.json({ success: true, data: mlResponse.data });
-  } catch (err: any) {
-    console.warn('[Disease Classification Forwarding Issue]', err.message);
-    // Graceful fallback response with confidence evaluation
-    const confidenceVal = 68.5; // Low-confidence fallback triggers uncertain expert escalation
-    return res.json({
-      success: true,
-      data: {
-        crop: req.body.crop_hint || 'Rice',
-        predicted_class: 'Rice___Bacterial_Blight',
-        display_name: 'Rice Bacterial Leaf Blight',
-        confidence: confidenceVal,
-        is_uncertain: confidenceVal < 75.0,
-        requires_expert_review: confidenceVal < 75.0,
-        symptoms: ['Water-soaked yellow-white wavy lesions along leaf margins'],
-        organic_treatment: ['Spray fresh cow dung water extract (20%) or Pseudomonas fluorescens @ 10g/L'],
-        chemical_treatment: ['Copper Oxychloride 50% WP @ 2.5g/L + Streptomycin sulphate @ 100g/acre'],
-        preventive_measures: ['Avoid excess nitrogen fertilizer application', 'Avoid field-to-field flooding'],
-        model_version: 'agritwin-disease-cnn-v1.0'
-      }
-    });
-  }
-});
+// Primary ML Core Modules Endpoints
+router.post('/classify-disease', upload.single('file'), AIController.classifyDisease);
+router.get('/diagnosis-history', AIController.getDiagnosisHistory);
+router.post('/diagnosis-compare', AIController.compareDiagnoses);
+router.post('/ml-crop-recommendation', AIController.recommendCropML);
 
 export default router;

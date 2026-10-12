@@ -47,6 +47,7 @@ class ModelRegistry:
         self.price_model = None
         self.disease_model = None
         self.disease_meta = None
+        self.crop_recommender = None
         self.registry_meta = None
         self.load_models()
 
@@ -89,7 +90,15 @@ class ModelRegistry:
             except Exception as e:
                 print(f"Failed to load disease model: {e}")
 
-        # 5. Load Registry Metadata
+        # 5. Load Crop Recommender Model
+        rec_path = os.path.join(ARTIFACTS_DIR, "crop_recommender_v1.joblib")
+        if os.path.exists(rec_path):
+            try:
+                self.crop_recommender = joblib.load(rec_path)
+            except Exception as e:
+                print(f"Failed to load crop recommender model: {e}")
+
+        # 6. Load Registry Metadata
         reg_path = os.path.join(ARTIFACTS_DIR, "model_registry.json")
         if os.path.exists(reg_path):
             try:

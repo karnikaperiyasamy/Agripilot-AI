@@ -68,15 +68,68 @@ describe('AgriPilot AI Decision-Support Ecosystem Test Suite', () => {
     assert.strictEqual(totalPooledWeight, 950);
   });
 
-  it('5. Government Scheme Finder filters by State and Category', async () => {
-    const schemes = [
-      { schemeName: 'PM-KISAN', category: 'Financial Support', state: 'All India' },
-      { schemeName: 'PMFBY', category: 'Insurance', state: 'All India' },
-      { schemeName: 'PMKSY', category: 'Irrigation', state: 'All India' }
-    ];
+  it('6. Module 2: ML Crop Recommendation returns top crop candidate and suitability factors', async () => {
+    const { MLClientService } = await import('../services/mlClientService');
+    const result = await MLClientService.recommendCrop({
+      N: 80.0,
+      P: 45.0,
+      K: 40.0,
+      temperature: 24.0,
+      humidity: 82.0,
+      ph: 6.5,
+      rainfall: 220.0
+    });
 
-    const financialSchemes = schemes.filter(s => s.category === 'Financial Support');
-    assert.strictEqual(financialSchemes.length, 1);
-    assert.strictEqual(financialSchemes[0].schemeName, 'PM-KISAN');
+    assert.ok(result.recommended_crop);
+    assert.strictEqual(result.recommended_crop, 'rice');
+    assert.ok(result.top_candidates.length >= 3);
+    assert.ok(result.confidence_percent > 0);
+    assert.ok(result.influencing_factors['Rainfall'] > 0);
+  });
+
+  it('7. Module 3: ML Crop Yield Predictor estimates yield per acre and total volume', async () => {
+    const { MLClientService } = await import('../services/mlClientService');
+    const result = await MLClientService.predictYield({
+      crop: 'Rice',
+      soil_type: 'Alluvial',
+      irrigation_type: 'Drip',
+      area_acres: 5.0,
+      rainfall_mm: 850.0,
+      temperature_c: 28.0,
+      nitrogen_kg: 120.0,
+      phosphorus_kg: 50.0,
+      potassium_kg: 50.0
+    });
+
+    assert.ok(result.estimated_yield_per_acre > 0);
+    assert.strictEqual(result.total_estimated_yield, result.estimated_yield_per_acre * 5.0);
+    assert.ok(result.confidence_interval_min < result.estimated_yield_per_acre);
+    assert.ok(result.confidence_interval_max > result.estimated_yield_per_acre);
+    assert.strictEqual(result.unit, 'Quintals');
+  });
+
+  it('8. Module 1: Diagnosis Comparison calculates temporal progression and pathogen status', async () => {
+    const sample1 = {
+      aiPredictionClass: 'Rice___Bacterial_Blight',
+      aiConfidence: 68.5,
+      createdAt: new Date('2026-10-01T10:00:00Z'),
+      riskLevel: 'Medium'
+    };
+    const sample2 = {
+      aiPredictionClass: 'Rice___Bacterial_Blight',
+      aiConfidence: 82.0,
+      createdAt: new Date('2026-10-08T10:00:00Z'),
+      riskLevel: 'High'
+    };
+
+    const daysApart = Math.abs(
+      Math.round((sample2.createdAt.getTime() - sample1.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+    );
+    const isSamePathogen = sample1.aiPredictionClass === sample2.aiPredictionClass;
+    const confDiff = Math.round((sample2.aiConfidence - sample1.aiConfidence) * 10) / 10;
+
+    assert.strictEqual(daysApart, 7);
+    assert.strictEqual(isSamePathogen, true);
+    assert.strictEqual(confDiff, 13.5);
   });
 });

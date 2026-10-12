@@ -106,9 +106,20 @@
       "confidence_threshold": 0.7,
       "status": "ACTIVE_PRODUCTION"
     },
+    "crop_recommender": {
+      "type": "RandomForestClassifier",
+      "artifact": "crop_recommender_v1.joblib",
+      "features": ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"],
+      "metrics": {
+        "accuracy_percent": 98.64,
+        "weighted_f1_percent": 98.64
+      },
+      "status": "ACTIVE_PRODUCTION",
+      "crops_supported": 22
+    },
     "harvest_window_estimator": {
       "type": "GDD & Agronomic Phenology Engine",
-      "methodology": "Growing Degree Days (Base Temp 10\u00b0C) + Field Maturity Phenology",
+      "methodology": "Growing Degree Days (Base Temp 10°C) + Field Maturity Phenology",
       "status": "ACTIVE_PRODUCTION"
     },
     "farmer_buyer_matcher": {

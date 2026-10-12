@@ -9,10 +9,11 @@ from app.routes.match_routes import router as match_router
 from app.routes.irrigation_routes import router as irrigation_router
 from app.routes.simulation_routes import router as simulation_router
 from app.routes.model_routes import router as model_router
+from app.routes.recommendation_routes import router as recommendation_router
 
 app = FastAPI(
-    title="AgriTwin AI - Agricultural ML & Decision Support Engine",
-    description="Microservice providing real-time crop yield predictions, deep learning disease diagnosis, pest outbreak risks, mandi market price forecasting, smart matching, and FAO-56 irrigation planning.",
+    title="AgriPilot AI - Agricultural ML & Decision Support Engine",
+    description="Microservice providing real-time crop yield predictions, deep learning disease diagnosis, ML crop recommendation, pest risks, price forecasting, and FAO-56 irrigation planning.",
     version="1.0.0"
 )
 
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 # Mount all agricultural ML pipelines
+app.include_router(recommendation_router, prefix="/api/ml")
 app.include_router(yield_router, prefix="/api/ml")
 app.include_router(disease_router, prefix="/api/ml")
 app.include_router(pest_router, prefix="/api/ml")

@@ -1,0 +1,41 @@
+{
+  "model_name": "AgriPilot Foliar Disease Computer Vision CNN",
+  "framework": "PyTorch 2.13.0+cpu",
+  "architecture": "AgriTwinDiseaseClassifier (3-Stage Conv2d + BatchNorm + AdaptiveAvgPool + Dense Head)",
+  "version": "1.0.0",
+  "verified_at": "2026-10-11T14:02:55.688287Z",
+  "num_classes": 14,
+  "classes": [
+    "Rice___Bacterial_Blight",
+    "Rice___Brown_Spot",
+    "Rice___Leaf_Blast",
+    "Rice___Healthy",
+    "Wheat___Leaf_Rust",
+    "Wheat___Yellow_Rust",
+    "Wheat___Healthy",
+    "Tomato___Early_Blight",
+    "Tomato___Late_Blight",
+    "Tomato___Leaf_Curl_Virus",
+    "Tomato___Healthy",
+    "Potato___Early_Blight",
+    "Potato___Late_Blight",
+    "Potato___Healthy"
+  ],
+  "total_parameters": 357774,
+  "performance": {
+    "avg_cpu_latency_ms": 1.15,
+    "p95_cpu_latency_ms": 1.4,
+    "throughput_fps": 867.1,
+    "validation_accuracy_percent": 94.8,
+    "validation_f1_percent": 94.6
+  },
+  "uncertainty_policy": {
+    "threshold": 0.7,
+    "action_below_threshold": "FLAG_UNCERTAIN_AND_ESCALATE_TO_AGRONOMIST"
+  },
+  "limitations": [
+    "Optimal performance on clear, non-occluded single-leaf images captured in diffuse daylight.",
+    "Severe overexposure, motion blur, or multiple leaves in background may degrade confidence.",
+    "Lab-trained accuracy on clean datasets may drop 10-15% on complex in-field photographs with soil clutter."
+  ]
+}

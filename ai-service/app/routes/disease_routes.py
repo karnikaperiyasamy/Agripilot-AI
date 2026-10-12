@@ -14,5 +14,7 @@ async def classify_disease(
         if len(contents) == 0:
             raise HTTPException(status_code=400, detail="Empty image payload provided")
         return classify_crop_image(contents, crop_hint=crop_hint)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image classification error: {str(e)}")
